@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "bgg-ts-client",
   "description": "Fully typed TypeScript client for the BoardGameGeek XMLv2 API with error handling and pagination support",
   "author": "krzysztof-fijolek",
@@ -13,12 +13,12 @@
   "engines": {
     "node": ">=16"
   },
-  "homepage": "https://github.com/krzysztof-fijolek/boardgamegeekjsclient#readme",
+  "homepage": "https://github.com/krzysztof-fijolek/bgg-ts-client#readme",
   "bugs": {
-    "url": "https://github.com/krzysztof-fijolek/boardgamegeekjsclient/issues"
+    "url": "https://github.com/krzysztof-fijolek/bgg-ts-client/issues"
   },
   "repository": {
-    "url": "git+https://github.com/krzysztof-fijolek/boardgamegeekjsclient.git",
+    "url": "git+https://github.com/krzysztof-fijolek/bgg-ts-client.git",
     "type": "git"
   },
   "keywords": [

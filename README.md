@@ -1,4 +1,4 @@
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/krzysztof-fijolek/boardgamegeekjsclient?color=4ea8ff&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/krzysztof-fijolek/bgg-ts-client?color=4ea8ff&style=for-the-badge)
 
 # bgg-ts-client
 
