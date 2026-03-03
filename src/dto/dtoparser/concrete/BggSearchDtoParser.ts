@@ -1,21 +1,16 @@
-import { JsonParser } from "jackson-js";
-import { BggSearchDto } from "../../concrete";
-import { IDtoParser } from "../interface";
+import { BggSearchDto } from '../../concrete';
+import { BaseDtoParser } from './BaseDtoParser';
 
-export class BggSearchDtoParser implements IDtoParser<BggSearchDto> {
-    parser: JsonParser<BggSearchDto>;
-    constructor() {
-        this.parser = new JsonParser<BggSearchDto>();
-        this.parser.defaultContext.features!.deserialization.FAIL_ON_UNKNOWN_PROPERTIES = false;
-    }
-    jsonToDto(jsonData: any): Promise<BggSearchDto[]> {
-        return new Promise<BggSearchDto[]>((resolve) => {
-            resolve(
-                this.parser.transform(jsonData.items, {
-                    mainCreator: () => [Array, [BggSearchDto]]
-                })
-            );
-        });
-    }
+export class BggSearchDtoParser extends BaseDtoParser<BggSearchDto> {
+  constructor() {
+    super('Search');
+  }
 
+  protected extractData(jsonData: any): any {
+    return jsonData.items ?? null;
+  }
+
+  protected getDtoClass(): any {
+    return BggSearchDto;
+  }
 }

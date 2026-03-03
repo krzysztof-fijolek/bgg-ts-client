@@ -1,21 +1,25 @@
-import { JsonParser } from 'jackson-js';
 import { BggThingDto } from '../../concrete';
-import { IDtoParser } from '../interface';
+import { BaseDtoParser } from './BaseDtoParser';
 
-export class BggThingDtoParser implements IDtoParser<BggThingDto> {
-  parser: JsonParser<BggThingDto>;
+export class BggThingDtoParser extends BaseDtoParser<BggThingDto> {
   constructor() {
-    this.parser = new JsonParser<BggThingDto>();
-    this.parser.defaultContext.features!.deserialization.FAIL_ON_UNKNOWN_PROPERTIES =
-      false;
+    super('Thing');
   }
-  jsonToDto(jsonData: any): Promise<BggThingDto[]> {
-    return new Promise<BggThingDto[]>((resolve) => {
-      resolve(
-        this.parser.transform(jsonData.items[0].item, {
-          mainCreator: () => [Array, [BggThingDto]],
-        })
-      );
-    });
+
+  protected extractData(jsonData: any): any {
+    return jsonData.items?.[0]?.item ?? null;
+  }
+
+  protected getDtoClass(): any {
+    return BggThingDto;
+  }
+
+  protected postProcess(items: BggThingDto[]): BggThingDto[] {
+    for (const item of items) {
+      if (!item.name && item.alternateNames?.length > 0) {
+        item.name = item.alternateNames[0];
+      }
+    }
+    return items;
   }
 }

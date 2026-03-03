@@ -1,9 +1,11 @@
 import { IDtoParser, BggThingDto } from '../../dto';
+import { BggClientError } from '../../errors';
 import { IFetcher } from '../../fetcher';
 import { IRequestPaginator } from '../../paginator';
 import { IQueryBuilder } from '../../query';
 import { IThingRequest } from '../../request';
 import { IResponseParser } from '../../responseparser';
+import { BGG_API_BASE_URL, THING_QUERY_LIMIT } from '../../constants';
 import {
   PaginationRequestDto,
   ProgressResponseDto,
@@ -27,7 +29,7 @@ export class BggThingClient implements IBggThingClient {
     dtoParser: IDtoParser<BggThingDto>,
     paginator: IRequestPaginator
   ) {
-    this.resource = 'https://boardgamegeek.com/xmlapi2/thing';
+    this.resource = `${BGG_API_BASE_URL}/thing`;
     this.builder = builder;
     this.fetcher = fetcher;
     this.responseParser = responseParser;
@@ -36,25 +38,30 @@ export class BggThingClient implements IBggThingClient {
   }
 
   async query(request: IThingRequest): Promise<BggThingDto[]> {
-    if (
-      Array.isArray(request.id) &&
-      (request.id as Array<number>).length > 50
-    ) {
-      const pagination: PaginationRequestDto<IThingRequest>[] =
-        this.paginator.paginate<IThingRequest>(request, 50);
+    try {
+      if (
+        Array.isArray(request.id) &&
+        (request.id as Array<number>).length > THING_QUERY_LIMIT
+      ) {
+        const pagination: PaginationRequestDto<IThingRequest>[] =
+          this.paginator.paginate<IThingRequest>(request, THING_QUERY_LIMIT);
 
-      let collection: BggThingDto[] = [];
+        let collection: BggThingDto[] = [];
 
-      for await (const data of pagination.map((page) =>
-        this.internalQuery(page.request)
-      )) {
-        collection.push(...data);
+        for await (const data of pagination.map((page) =>
+          this.internalQuery(page.request)
+        )) {
+          collection.push(...data);
+        }
+
+        return collection;
       }
 
-      return collection;
+      return this.internalQuery(request);
+    } catch (error) {
+      if (error instanceof BggClientError) throw error;
+      throw new BggClientError('thing', error instanceof Error ? error : undefined);
     }
-
-    return this.internalQuery(request);
   }
 
   async queryWithProgress(

@@ -1,21 +1,16 @@
-import { JsonParser } from "jackson-js";
-import { BggForumlistDto } from "../../concrete/BggForumlistDto";
-import { IDtoParser } from "../interface";
+import { BggForumlistDto } from '../../concrete/BggForumlistDto';
+import { BaseDtoParser } from './BaseDtoParser';
 
-export class BggForumlistDtoParser implements IDtoParser<BggForumlistDto> {
-    parser: JsonParser<BggForumlistDto>;
-    constructor() {
-        this.parser = new JsonParser<BggForumlistDto>();
-        this.parser.defaultContext.features!.deserialization.FAIL_ON_UNKNOWN_PROPERTIES = false;
-    }
-    jsonToDto(jsonData: any): Promise<BggForumlistDto[]> {
-        return new Promise<BggForumlistDto[]>((resolve) => {
-            resolve(
-              this.parser.transform(jsonData.forums, {
-                mainCreator: () => [Array, [BggForumlistDto]]
-              })
-            );
-        });
-    }
+export class BggForumlistDtoParser extends BaseDtoParser<BggForumlistDto> {
+  constructor() {
+    super('Forumlist');
+  }
 
+  protected extractData(jsonData: any): any {
+    return jsonData.forums ?? null;
+  }
+
+  protected getDtoClass(): any {
+    return BggForumlistDto;
+  }
 }

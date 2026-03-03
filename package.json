@@ -1,8 +1,8 @@
 {
-  "version": "2.0.1",
-  "name": "@kfijolek/boardgamegeekclient",
-  "description": "TypeScript client to interact with BoardGameGeek public XML API",
-  "author": "learningprocesss",
+  "version": "0.1.0",
+  "name": "bgg-ts-client",
+  "description": "Fully typed TypeScript client for the BoardGameGeek XMLv2 API with error handling and pagination support",
+  "author": "krzysztof-fijolek",
   "license": "MIT",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -11,22 +11,26 @@
     "dist"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=16"
   },
-  "homepage": "https://github.com/LearningProcesss/boardgamegeekjsclient#readme",
+  "homepage": "https://github.com/krzysztof-fijolek/boardgamegeekjsclient#readme",
   "bugs": {
-    "url": "https://github.com/LearningProcesss/boardgamegeekjsclient/issues"
+    "url": "https://github.com/krzysztof-fijolek/boardgamegeekjsclient/issues"
   },
   "repository": {
-    "url": "https://github.com/krzysztof-fijolek/boardgamegeekjsclient",
+    "url": "git+https://github.com/krzysztof-fijolek/boardgamegeekjsclient.git",
     "type": "git"
   },
   "keywords": [
     "boardgamegeek",
-    "api client",
-    "wrapper",
-    "fully typed",
-    "typescript"
+    "bgg",
+    "board-games",
+    "boardgame",
+    "bgg-api",
+    "xmlapi2",
+    "api-client",
+    "typescript",
+    "tabletop"
   ],
   "scripts": {
     "start": "echo TODO!",

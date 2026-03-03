@@ -1,9 +1,11 @@
 import { IDtoParser, BggForumlistDto } from "../../dto";
+import { BggClientError } from "../../errors";
 import { IFetcher } from "../../fetcher";
 import { IRequestPaginator } from "../../paginator";
 import { IQueryBuilder } from "../../query";
 import { IForumlistRequest } from "../../request";
 import { IResponseParser } from "../../responseparser";
+import { BGG_API_BASE_URL, FORUMLIST_QUERY_LIMIT } from "../../constants";
 import { PaginationRequestDto, ProgressResponseDto, QueryOptions } from "../dto";
 import { IBggForumlistClient } from "../interface/IBggClients";
 
@@ -22,7 +24,7 @@ export class BggForumlistClient implements IBggForumlistClient {
         dtoParser: IDtoParser<BggForumlistDto>,
         paginator: IRequestPaginator
     ) {
-        this.resource = "https://boardgamegeek.com/xmlapi2/forumlist";
+        this.resource = `${BGG_API_BASE_URL}/forumlist`;
         this.builder = builder;
         this.fetcher = fetcher;
         this.responseParser = responseParser;
@@ -31,19 +33,24 @@ export class BggForumlistClient implements IBggForumlistClient {
     }
 
     async query(request: IForumlistRequest): Promise<BggForumlistDto[]> {
-        if (Array.isArray(request.id) && (request.id as Array<number>).length > 50) {
-            const pagination: PaginationRequestDto<IForumlistRequest>[] = this.paginator.paginate<IForumlistRequest>(request, 50);
+        try {
+            if (Array.isArray(request.id) && (request.id as Array<number>).length > FORUMLIST_QUERY_LIMIT) {
+                const pagination: PaginationRequestDto<IForumlistRequest>[] = this.paginator.paginate<IForumlistRequest>(request, FORUMLIST_QUERY_LIMIT);
 
-            let collection: BggForumlistDto[] = []
+                let collection: BggForumlistDto[] = []
 
-            for await (const data of pagination.map(page => this.internalQuery(page.request))) {
-                collection.push(...data);
+                for await (const data of pagination.map(page => this.internalQuery(page.request))) {
+                    collection.push(...data);
+                }
+
+                return collection;
             }
 
-            return collection;
+            return this.internalQuery(request);
+        } catch (error) {
+            if (error instanceof BggClientError) throw error;
+            throw new BggClientError('forumlist', error instanceof Error ? error : undefined);
         }
-
-        return this.internalQuery(request);
     }
 
     async queryWithProgress(request: IForumlistRequest, progressOptions?: QueryOptions | undefined, progressHandler?: (progress: ProgressResponseDto<BggForumlistDto>) => void): Promise<void> {

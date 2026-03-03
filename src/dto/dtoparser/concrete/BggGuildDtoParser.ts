@@ -1,21 +1,16 @@
-import { JsonParser } from "jackson-js";
-import { BggGuildDto } from "../../concrete";
-import { IDtoParser } from "../interface";
+import { BggGuildDto } from '../../concrete';
+import { BaseDtoParser } from './BaseDtoParser';
 
-export class BggGuildDtoParser implements IDtoParser<BggGuildDto> {
-    parser: JsonParser<BggGuildDto>;
-    constructor() {
-        this.parser = new JsonParser<BggGuildDto>();
-        this.parser.defaultContext.features!.deserialization.FAIL_ON_UNKNOWN_PROPERTIES = false;
-    }
-    jsonToDto(jsonData: any): Promise<BggGuildDto[]> {
-        return new Promise<BggGuildDto[]>((resolve) => {
-            resolve(
-                this.parser.transform(jsonData.guild, {
-                    mainCreator: () => [Array, [BggGuildDto]]
-                })
-            );
-        });
-    }
+export class BggGuildDtoParser extends BaseDtoParser<BggGuildDto> {
+  constructor() {
+    super('Guild');
+  }
 
+  protected extractData(jsonData: any): any {
+    return jsonData.guild ?? null;
+  }
+
+  protected getDtoClass(): any {
+    return BggGuildDto;
+  }
 }

@@ -1,5 +1,6 @@
 import { X2jOptions, parse } from "fast-xml-parser";
 import { IResponseParser } from "../interface";
+import { BggParseError } from "../../errors";
 
 export class XmlResponseParser implements IResponseParser<string, any> {
     options: Partial<X2jOptions> = {
@@ -19,8 +20,21 @@ export class XmlResponseParser implements IResponseParser<string, any> {
         stopNodes: ["parse-me-as-string"]
     };
     parseResponse(response: string): Promise<any> {
-        return new Promise<any>(resolve => {
-            resolve(parse(response, this.options));
+        return new Promise<any>((resolve, reject) => {
+            try {
+                if (!response || response.trim().length === 0) {
+                    reject(new BggParseError('Empty XML response'));
+                    return;
+                }
+                resolve(parse(response, this.options));
+            } catch (error) {
+                reject(
+                    new BggParseError(
+                        `Failed to parse XML response: ${error instanceof Error ? error.message : String(error)}`,
+                        response
+                    )
+                );
+            }
         });
     }
 }

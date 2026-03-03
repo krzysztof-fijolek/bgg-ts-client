@@ -1,9 +1,10 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/krzysztof-fijolek/boardgamegeekjsclient?color=4ea8ff&style=for-the-badge)
 
-# boardgamegeekclient
+# bgg-ts-client
 
-A wrapper around the official BoardGameGeek V2 API, designed to provide a more convenient way to work with their XML-based endpoints. 
-The package now supports the required authorization and can be used to build web apps or integrate backend services.
+A TypeScript client for the official BoardGameGeek XML API v2.
+
+> **Note:** This project is a fork of [boardgamegeekclient](https://github.com/LearningProcesss/boardgamegeekjsclient) by [learningprocesss](https://github.com/LearningProcesss). It is now developed and maintained independently.
 
 ## Key features
 
@@ -13,12 +14,13 @@ The package now supports the required authorization and can be used to build web
 - :ballot_box_with_check: Typescript written
 - :ballot_box_with_check: Promisified
 - :ballot_box_with_check: thing, family, forum, thread, user, guild, play, collection endpoints
+- :ballot_box_with_check: Structured error handling with typed error classes
 
 ![](/docs/thing.gif)
 
 ## Prerequisites
 
-Starting in Fall 2025, BoardGameGeek requires all API clients to use authorization.  
+Starting in Fall 2025, BoardGameGeek requires all API clients to use authorization.
 Before using this package, you **must** register your application on BoardGameGeek and obtain an access token.
 
 Register and manage your application here: https://boardgamegeek.com/applications
@@ -26,11 +28,11 @@ Register and manage your application here: https://boardgamegeek.com/application
 ## Installation
 
 ```bash
-npm i boardgamegeekclient
+npm i bgg-ts-client
 ```
 
 ```bash
-yarn add boardgamegeekclient
+yarn add bgg-ts-client
 ```
 
 ## Usage
@@ -38,13 +40,13 @@ yarn add boardgamegeekclient
 In Node.js (commonjs) environment
 
 ```js
-const { BggClient } = require("boardgamegeekclient");
+const { BggClient } = require("bgg-ts-client");
 ```
 
 In ES environment
 
 ```js
-import { BggClient } from 'boardgamegeekclient';
+import { BggClient } from 'bgg-ts-client';
 ```
 
 Initialize BggClient and get singleton instance
@@ -59,13 +61,13 @@ Interact with boardgamegeek entities using the corresponding client object and f
 
 ### Thing
 
-Get boardgame, boardgame expansion, boardgame accessory, videogame, rpgitem, rpgissue informations.  
-Thing client expose **query** and **queryWithProgress**.  
+Get boardgame, boardgame expansion, boardgame accessory, videogame, rpgitem, rpgissue information.
+Thing client exposes **query** and **queryWithProgress**.
 
 #### Examples
 
 ```ts
-const things: BggThingDto[] = await client.thing.query({ id: [174430, 35421], 
+const things: BggThingDto[] = await client.thing.query({ id: [174430, 35421],
                                                          videos: 1,
                                                          comments: 1,
                                                          marketplace: 1,
@@ -82,7 +84,7 @@ await client.thing.queryWithProgress({
                 stats: 1,
                 type: "boardgame"
             }, { limit: 10 }, _data => {
-                
+
             });
 
 // with progress handler registered on the client itself
@@ -101,10 +103,10 @@ await client.thing.queryWithProgress({
 
 ## Family
 
-Get rpg, rpgperiodical, boardgamefamily informations.  
-Family client expose **query** and **queryWithProgress**. 
+Get rpg, rpgperiodical, boardgamefamily information.
+Family client exposes **query** and **queryWithProgress**.
 
-### Examples  
+### Examples
 
 ```js
 const families = await client.family.query({ id: [174430, 35421] });
@@ -112,70 +114,103 @@ const families = await client.family.query({ id: [174430, 35421] });
 
 ## Forum List
 
-Get a list of forums  
-(in boardgame or family page (of the id), forums tab, left sidebars with all forums).  
-ForumList client expose **query** and **queryWithProgress**. 
+Get a list of forums
+(in boardgame or family page (of the id), forums tab, left sidebars with all forums).
+ForumList client exposes **query** and **queryWithProgress**.
 
 ### Examples
 
 ```ts
 const forumlists: BggForumlistDto[] = await client.forumlist.query({ id: [8374,22184,59218,1029,2076], type: ['family']});
-```  
+```
 
 ## Forum
 
-Get a **single** forum.  
+Get a **single** forum.
 
-### Examples  
+### Examples
 
 ```ts
 const forum = await client.forum.query({ id: 19, page: 3 });
-```  
+```
 
 ## Thread
 
 Get a **single** thread.
 
-### Examples  
+### Examples
 
 ```ts
 const threads: BggThreadDto[] = await client.thread.query({ id: 2571698, minarticledate: '2021-01-03', count: 15 });
-```  
+```
 
 ## User
 
 Get public profile information about a user by username.
 
-### Examples  
+### Examples
 
 ```ts
 const users: BggUserDto[] = await client.user.query({ name: 'mattiabanned', hot: 1, top: 1 });
-```  
+```
 
 ## Guild
 
 Get a **single** guild.
 
-### Examples  
+### Examples
 
 ```ts
 const guilds: BggGuildDto[] = await client.guild.query({ id: 1000, members: 1, sort: 'date', page: 1 });
-```  
+```
 
 ## Play
 
 Request plays logged by a particular user or for a particular item.
 
-### Examples  
+### Examples
 
 ```ts
 const plays: BggPlayDto[] = await client.play.query({ username: 'mattiabanned' });
-```  
+```
 
-### Collection
+## Collection
 
-### Examples  
+Request the collection of a particular user.
+
+### Examples
 
 ```ts
 const collections: BggCollectionDto[]  = await client.collection.query({ username: 'mattiabanned', excludesubtype: ["boardgameaccessory"] });
-``` 
+```
+
+## Error Handling
+
+All errors thrown by the client are wrapped in a `BggClientError`, which includes the endpoint name and the underlying cause. You can inspect the `cause` to determine whether the failure was an HTTP error or a parse error.
+
+- **`BggClientError`** — wraps all errors; includes `endpoint` and `cause`
+- **`BggApiError`** — HTTP failures; includes `statusCode` and `url`
+- **`BggParseError`** — XML/DTO parse failures; includes truncated `rawData`
+
+```ts
+import { BggClient, BggClientError, BggApiError, BggParseError } from 'bgg-ts-client';
+
+const client = BggClient.Create({ apiKey: 'YOUR_API_KEY' });
+
+try {
+  const things = await client.thing.query({ id: [174430], type: 'boardgame' });
+} catch (error) {
+  if (error instanceof BggClientError) {
+    console.log(error.endpoint); // e.g. "thing"
+
+    if (error.cause instanceof BggApiError) {
+      console.log(error.cause.statusCode); // e.g. 500
+      console.log(error.cause.url);
+    }
+
+    if (error.cause instanceof BggParseError) {
+      console.log(error.cause.rawData); // truncated to 500 chars
+    }
+  }
+}
+```

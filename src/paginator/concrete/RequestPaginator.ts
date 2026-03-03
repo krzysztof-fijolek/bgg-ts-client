@@ -1,10 +1,11 @@
 import { PaginationRequestDto } from "../../client/dto";
+import { DEFAULT_PAGINATOR_LIMIT } from "../../constants";
 import { IRequest } from "../../request";
 import { IRequestPaginator } from "../interface";
 
 export class RequestPaginator implements IRequestPaginator {
 
-  constructor(private limit: number = 30) {
+  constructor(private limit: number = DEFAULT_PAGINATOR_LIMIT) {
 
   }
 

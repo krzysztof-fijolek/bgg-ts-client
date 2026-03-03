@@ -24,21 +24,15 @@ export class BggThingDto implements IBggDto {
   @JsonAlias({ values: ['@_id'] })
   id!: number;
 
-  @JsonProperty()
-  @JsonClassType({ type: () => [String] })
-  @JsonDeserialize({
-    using: (value: []) => value.map((item) => item['@_value'])[0],
-  })
   name!: string;
 
   @JsonProperty({ value: 'name' })
   @JsonClassType({ type: () => [Array, [String]] })
   @JsonAlias({ values: ['name'] })
   @JsonDeserialize({
-    using: (value: any[]) => {
-      return Array.isArray(value)
-        ? value.map((item) => item?.['@_value']).filter(Boolean)
-        : [];
+    using: (value: any) => {
+      if (Array.isArray(value)) return value.map((item: any) => item?.['@_value']).filter(Boolean);
+      return [];
     },
   })
   alternateNames!: string[];
@@ -169,5 +163,5 @@ export class BggThingDto implements IBggDto {
   @JsonProperty()
   @JsonClassType({ type: () => [Object] })
   @JsonAlias({ values: ['poll-summary'] })
-  pollSummary!: any;
+  pollSummary?: any;
 }

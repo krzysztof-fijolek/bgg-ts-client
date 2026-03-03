@@ -4,3 +4,4 @@ node_modules
 dist/
 debug
 coverage
+.claude/settings.local.json

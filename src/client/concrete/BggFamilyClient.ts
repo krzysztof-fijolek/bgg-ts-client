@@ -1,9 +1,11 @@
 import { IDtoParser, BggFamilyDto } from "../../dto";
+import { BggClientError } from "../../errors";
 import { IFetcher } from "../../fetcher";
 import { IRequestPaginator } from "../../paginator";
 import { IQueryBuilder } from "../../query";
 import { IFamilyRequest } from "../../request";
 import { IResponseParser } from "../../responseparser";
+import { BGG_API_BASE_URL, FAMILY_QUERY_LIMIT } from "../../constants";
 import { PaginationRequestDto, QueryOptions, ProgressResponseDto } from "../dto";
 import { IBggFamilyClient } from "../interface";
 
@@ -21,7 +23,7 @@ export class BggFamilyClient implements IBggFamilyClient {
         dtoParser: IDtoParser<BggFamilyDto>,
         paginator: IRequestPaginator
     ) {
-        this.resource = "https://boardgamegeek.com/xmlapi2/family";
+        this.resource = `${BGG_API_BASE_URL}/family`;
         this.builder = builder;
         this.fetcher = fetcher;
         this.responseParser = responseParser;
@@ -48,18 +50,23 @@ export class BggFamilyClient implements IBggFamilyClient {
     }
 
     async query(request: IFamilyRequest): Promise<BggFamilyDto[]> {
-        if (Array.isArray(request.id) && (request.id as Array<number>).length > 1) {
-            const pagination: PaginationRequestDto<IFamilyRequest>[] = this.paginator.paginate(request, 1);
+        try {
+            if (Array.isArray(request.id) && (request.id as Array<number>).length > FAMILY_QUERY_LIMIT) {
+                const pagination: PaginationRequestDto<IFamilyRequest>[] = this.paginator.paginate(request, FAMILY_QUERY_LIMIT);
 
-            let collection: BggFamilyDto[] = []
+                let collection: BggFamilyDto[] = []
 
-            for await (const data of pagination.map(page => this.internalQuery(page.request))) {
-                collection.push(...data);
+                for await (const data of pagination.map(page => this.internalQuery(page.request))) {
+                    collection.push(...data);
+                }
+
+                return collection;
             }
-
-            return collection;
+            return this.internalQuery(request);
+        } catch (error) {
+            if (error instanceof BggClientError) throw error;
+            throw new BggClientError('family', error instanceof Error ? error : undefined);
         }
-        return this.internalQuery(request);
     }
 
     private async internalQuery(request: IFamilyRequest): Promise<BggFamilyDto[]> {

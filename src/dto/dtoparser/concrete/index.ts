@@ -1,3 +1,4 @@
+export { BaseDtoParser } from './BaseDtoParser';
 export { BggThingDtoParser } from './BggThingDtoParser';
 export { BggFamilyDtoParser } from './BggFamilyDtoParser';
 export { BggForumlistDtoParser } from './BggForumlistDtoParser';

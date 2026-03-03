@@ -1,4 +1,6 @@
 import { IFetcher } from '../interface';
+import { BggApiError } from '../../errors';
+import { RETRY_DELAY_MS, MAX_RETRY_ATTEMPTS } from '../../constants';
 import fetch from 'isomorphic-unfetch';
 
 export class TextFetcher implements IFetcher<string, string> {
@@ -10,11 +12,25 @@ export class TextFetcher implements IFetcher<string, string> {
 
   async doFetch(query: string): Promise<string> {
     let response = await this.internalFetch(query);
+    let retries = 0;
 
-    while (response.status === 202) {
-      await this.delay(6000);
-
+    while (response.status === 202 && retries < MAX_RETRY_ATTEMPTS) {
+      await this.delay(RETRY_DELAY_MS);
       response = await this.internalFetch(query);
+      retries++;
+    }
+
+    if (response.status === 202) {
+      throw new BggApiError(
+        202,
+        query,
+        `BGG API still processing after ${MAX_RETRY_ATTEMPTS} retries`
+      );
+    }
+
+    if (!response.ok) {
+      const body = await response.text().catch(() => '');
+      throw new BggApiError(response.status, query, body || undefined);
     }
 
     return response.text();
@@ -29,6 +45,7 @@ export class TextFetcher implements IFetcher<string, string> {
 
     return response;
   }
+
   async delay(waitFor: number): Promise<any> {
     return new Promise((resolve) => {
       setTimeout(resolve, waitFor);

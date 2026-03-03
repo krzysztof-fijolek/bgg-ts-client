@@ -1,21 +1,16 @@
-import { JsonParser } from "jackson-js";
-import { BggCollectionDto } from "../../concrete";
-import { IDtoParser } from "../interface";
+import { BggCollectionDto } from '../../concrete';
+import { BaseDtoParser } from './BaseDtoParser';
 
-export class BggCollectionDtoParser implements IDtoParser<BggCollectionDto> {
-    parser: JsonParser<BggCollectionDto>;
-    constructor() {
-        this.parser = new JsonParser<BggCollectionDto>();
-            this.parser.defaultContext.features!.deserialization.FAIL_ON_UNKNOWN_PROPERTIES = false;
-    }
-    jsonToDto(jsonData: any): Promise<BggCollectionDto[]> {
-        return new Promise<BggCollectionDto[]>((resolve) => {
-            resolve(
-                this.parser.transform(jsonData.items, {
-                    mainCreator: () => [Array, [BggCollectionDto]]
-                })
-            );
-        });
-    }
+export class BggCollectionDtoParser extends BaseDtoParser<BggCollectionDto> {
+  constructor() {
+    super('Collection');
+  }
 
+  protected extractData(jsonData: any): any {
+    return jsonData.items ?? null;
+  }
+
+  protected getDtoClass(): any {
+    return BggCollectionDto;
+  }
 }
