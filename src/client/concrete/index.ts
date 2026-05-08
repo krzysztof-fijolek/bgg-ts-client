@@ -1,3 +1,5 @@
+export { BaseBggClient } from './BaseBggClient';
+export { PaginatedBggClient } from './PaginatedBggClient';
 export { BggThingClient } from './BggThingClient';
 export { BggFamilyClient } from './BggFamilyClient';
 export { BggForumlistClient } from './BggForumlistClient';

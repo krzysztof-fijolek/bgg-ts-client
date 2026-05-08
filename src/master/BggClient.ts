@@ -46,6 +46,12 @@ export class BggClient {
     }
 
     static Create(options: BggClientOptions): BggClient {
+        if (!options || typeof options.apiKey !== 'string' || options.apiKey.trim() === '') {
+            throw new Error(
+                'BggClient: apiKey is required. BoardGameGeek requires all XML API requests to be authorized. ' +
+                'Register your application and obtain a token at https://boardgamegeek.com/applications'
+            );
+        }
         if (!BggClient.instance) {
             BggClient.instance = new BggClient(options.apiKey);
         }
